@@ -4,12 +4,8 @@
       <!--      Шапка доски-->
       <div class="desk__header">
         <h1 class="desk__title">Design Coffee Lab</h1>
-<!--        Добавили кнопку для добавления новой колонки-->
-        <button
-            class="desk__add"
-            type="button"
-            @click="addColumn"
-        >
+        <!--        Добавили кнопку для добавления новой колонки-->
+        <button class="desk__add" type="button" @click="addColumn">
           Добавить столбец
         </button>
         <div class="desk__filters">
@@ -17,22 +13,21 @@
             <!--            Список пользователей-->
             <ul class="user-filter">
               <li
-                  v-for="user in users"
-                  :key="user.id"
-                  :title="user.name"
-                  class="user-filter__item"
-                  :class="{ active: filters.users.some(id => id === user.id) }"
-                  @click="$emit(
-                    'applyFilters',
-                    { item: user.id, entity: 'users' }
-                  )"
+                v-for="user in users"
+                :key="user.id"
+                :title="user.name"
+                class="user-filter__item"
+                :class="{ active: filters.users.some((id) => id === user.id) }"
+                @click="
+                  $emit('applyFilters', { item: user.id, entity: 'users' })
+                "
               >
                 <a class="user-filter__button">
                   <img
-                      :src="getImage(user.avatar)"
-                      alt="Аватар юзера"
-                      width="24"
-                      height="24"
+                    :src="getImage(user.avatar)"
+                    alt="Аватар юзера"
+                    width="24"
+                    height="24"
                   />
                 </a>
               </li>
@@ -42,19 +37,18 @@
             <!--            Список статусов-->
             <ul class="meta-filter">
               <li
-                  v-for="({ value, label }) in STATUSES"
-                  :key="value"
-                  class="meta-filter__item"
-                  :class="{ active: filters.statuses.some(s => s === value) }"
-                  @click="$emit(
-                    'applyFilters',
-                    { item: value, entity: 'statuses' }
-                  )"
+                v-for="{ value, label } in STATUSES"
+                :key="value"
+                class="meta-filter__item"
+                :class="{ active: filters.statuses.some((s) => s === value) }"
+                @click="
+                  $emit('applyFilters', { item: value, entity: 'statuses' })
+                "
               >
                 <a
-                    class="meta-filter__status"
-                    :class="`meta-filter__status meta-filter__status--color meta-filter__status--${value}`"
-                    :title="label"
+                  class="meta-filter__status"
+                  :class="`meta-filter__status meta-filter__status--color meta-filter__status--${value}`"
+                  :title="label"
                 />
               </li>
             </ul>
@@ -63,65 +57,60 @@
       </div>
       <!--      Колонки и задачи-->
       <div v-if="columns.length" class="desk__columns">
-<!--        Показываем колонки-->
+        <!--        Показываем колонки-->
         <desk-column
-            v-for="column in state.columns"
-            :key="column.id"
-            :column="column"
-            :tasks="props.tasks"
-            @update="updateColumn"
-            @delete="deleteColumn"
-            @update-tasks="$emit('updateTasks', $event)"
+          v-for="column in state.columns"
+          :key="column.id"
+          :column="column"
+          :tasks="props.tasks"
+          @update="updateColumn"
+          @delete="deleteColumn"
+          @update-tasks="$emit('updateTasks', $event)"
         />
       </div>
       <!--      Пустая доска-->
-      <p
-          v-else
-          class="desk__emptiness"
-      >
-        Пока нет ни одной колонки
-      </p>
+      <p v-else class="desk__emptiness">Пока нет ни одной колонки</p>
     </section>
   </main>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import columns from '../mocks/columns.json'
-import users from '../mocks/users.json'
-import { STATUSES } from '../common/constants'
-import DeskColumn from '@/modules/columns/components/DeskColumn.vue'
-import { getImage } from '../common/helpers'
-import { uniqueId } from 'lodash'
+import { reactive } from "vue";
+import columns from "../mocks/columns.json";
+import users from "../mocks/users.json";
+import { STATUSES } from "../common/constants";
+import DeskColumn from "@/modules/columns/components/DeskColumn.vue";
+import { getImage } from "../common/helpers";
+import { uniqueId } from "lodash";
 
 const props = defineProps({
   tasks: {
     type: Array,
-    required: true
+    required: true,
   },
   filters: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-defineEmits(['applyFilters', 'updateTasks'])
+defineEmits(["applyFilters", "updateTasks"]);
 
-const state = reactive({ columns })
+const state = reactive({ columns });
 
-function addColumn () {
-  state.columns.push({ id: uniqueId('column_'), title: 'Новый столбец' })
+function addColumn() {
+  state.columns.push({ id: uniqueId("column_"), title: "Новый столбец" });
 }
 
-function updateColumn (column) {
-  const index = state.columns.findIndex(({ id }) => id === column.id)
+function updateColumn(column) {
+  const index = state.columns.findIndex(({ id }) => id === column.id);
   if (~index) {
-    state.columns.splice(index, 1, column)
+    state.columns.splice(index, 1, column);
   }
 }
 
-function deleteColumn (id) {
-  state.columns = state.columns.filter(column => column.id !== id);
+function deleteColumn(id) {
+  state.columns = state.columns.filter((column) => column.id !== id);
 }
 </script>
 
