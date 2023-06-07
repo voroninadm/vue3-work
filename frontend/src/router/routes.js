@@ -4,6 +4,13 @@ export default [
     name: "HomeView",
     component: () => import("../views/HomeView.vue"),
     meta: { layout: "AppLayoutMain" },
-    children: [],
+    children: [
+      {
+        path: "/:id",
+        name: "TaskView",
+        component: () => import("../views/TaskView.vue"),
+        meta: { layout: "AppLayoutMain" },
+      },
+    ],
   },
 ];
