@@ -8,6 +8,7 @@
 import { shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 import AppLayoutDefault from "./AppLayoutDefault.vue";
+
 const route = useRoute();
 const layout = shallowRef(null);
 // Наблюдаем за изменением маршрута
