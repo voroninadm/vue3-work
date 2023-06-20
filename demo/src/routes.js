@@ -14,4 +14,9 @@ export default [
       path: '/counter-4',
       component: () => import("./demo4/DemoCounter.vue"),
     },
+    {
+      name: 'Server',
+      path: '/server',
+      component: () => import("./demo5/Server.vue"),
+    }
   ];
