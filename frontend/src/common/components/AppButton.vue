@@ -1,6 +1,9 @@
 <template>
-  <button class="button" :type="type">
-    <slot />
+  <button
+      class="button"
+      :type="type"
+  >
+    <slot/>
   </button>
 </template>
 
@@ -8,9 +11,10 @@
 defineProps({
   type: {
     type: String,
-    default: "button",
-  },
-});
+    default: 'button'
+  }
+})
+
 </script>
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";

@@ -1,30 +1,30 @@
-import { defineStore } from "pinia";
-import columns from "@/mocks/columns.json";
-import { uniqueId } from "lodash";
+import { defineStore } from 'pinia'
+import { columnsService } from '@/services'
 
-export const useColumnsStore = defineStore("columns", {
-  state: () => ({
-    columns: [],
-  }),
-  getters: {},
-  actions: {
-    async fetchColumns () {
-			// Получение данных из JSON-файла заменим в последующих разделах
-			this.columns = columns
+export const useColumnsStore = defineStore('columns', {
+	state: () => ({
+		columns: [],
+	}),
+	getters: {},
+	actions: {
+		async fetchColumns () {
+			this.columns = await columnsService.fetchColumns()
 		},
-		addColumn () {
-			// При создании колонки мы добавляем дефолтную, которую можем изменить позже
-			this.columns.push({ id: uniqueId('column_'), title: 'Новый столбец' })
+		async addColumn () {
+			// При создании колонки мы добавляем дефолтную колонку, которую можем изменить позже
+			const newColumn = await columnsService.createColumn({ title: 'Новый столбец'})
+			this.columns.push(newColumn)
 		},
-		updateColumn (column) {
+		async updateColumn (column) {
+			await columnsService.updateColumns(column)
 			const index = this.columns.findIndex(({ id }) => id === column.id)
 			if (~index) {
 				this.columns.splice(index, 1, column)
 			}
 		},
-		deleteColumn (id) {
+		async deleteColumn (id) {
+			await columnsService.deleteColumns(id)
 			this.columns = this.columns.filter(column => column.id !== id)
 		}
 	},
-  },
-});
+})

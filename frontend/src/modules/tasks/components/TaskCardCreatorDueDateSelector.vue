@@ -3,35 +3,36 @@
     Срок:
     <div class="task-card__datepicker">
       <date-picker
-        v-model="date"
-        input-format="dd:MM:yyyy"
-        :lower-limit="new Date()"
+          v-model="date"
+          input-format="dd:MM:yyyy"
+          :lower-limit="new Date()"
       />
     </div>
   </li>
 </template>
 
 <script setup>
-import DatePicker from "vue3-datepicker";
-import { computed } from "vue";
+import DatePicker from 'vue3-datepicker'
+import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
     type: Date,
-    default: null,
-  },
-});
+    default: null
+  }
+})
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(['update:modelValue'])
 
 const date = computed({
-  get() {
-    return props.modelValue;
+  get () {
+    return props.modelValue
   },
-  set(value) {
-    emit("update:modelValue", value);
-  },
-});
+  set (value) {
+    emit('update:modelValue', value)
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

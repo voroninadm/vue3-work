@@ -1,5 +1,8 @@
 <template>
-  <button class="column__button column__update icon" type="button" />
+  <button
+    class="column__button column__update icon"
+    type="button"
+  />
 </template>
 
 <style lang="scss" scoped>

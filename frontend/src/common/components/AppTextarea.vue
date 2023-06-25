@@ -2,52 +2,55 @@
   <div class="text-field">
     <!--    Поле ввода текста-->
     <textarea
-      :value="modelValue"
-      :name="props.name"
-      class="text-field__input"
-      :class="{ 'text-field__input--error': showError }"
-      :placeholder="props.placeholder"
-      :required="props.required"
-      @input="$emit('update:modelValue', $event.target.value)"
+        :value="modelValue"
+        :name="props.name"
+        class="text-field__input"
+        :class="{'text-field__input--error': showError}"
+        :placeholder="props.placeholder"
+        :required="props.required"
+        @input="$emit('update:modelValue', $event.target.value)"
     />
     <!--      Отображение ошибок валидации-->
-    <span v-if="showError" class="text-field__text">
+    <span
+        v-if="showError"
+        class="text-field__text"
+    >
       {{ errorText }}
     </span>
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
     type: [String, Number],
-    required: true,
+    required: true
   },
   name: {
     type: String,
-    required: true,
+    required: true
   },
   placeholder: {
     type: String,
-    default: "",
+    default: ''
   },
   errorText: {
     type: String,
-    default: "",
+    default: ''
   },
   required: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 
-defineEmits(["update:modelValue"]);
+defineEmits(['update:modelValue'])
 
 const showError = computed(() => {
   return !props.modelValue && !!props.errorText;
-});
+})
 </script>
 
 <style lang="scss" scoped>

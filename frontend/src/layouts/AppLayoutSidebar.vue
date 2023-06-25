@@ -1,16 +1,18 @@
 <template>
   <!--  Отслеживает в какую колонку передана задача-->
   <app-drop
-    class="backlog"
-    :class="{ 'backlog--hide': state.backlogIsHidden }"
-    @drop="moveTask"
+      class="backlog"
+      :class="{ 'backlog--hide': state.backlogIsHidden }"
+      @drop="moveTask"
   >
     <!--  Отвечает за открытие/закрытие беклога-->
     <button
-      class="backlog__title"
-      @click="state.backlogIsHidden = !state.backlogIsHidden"
+        class="backlog__title"
+        @click="state.backlogIsHidden = !state.backlogIsHidden"
     >
-      <span> Бэклог </span>
+      <span>
+        Бэклог
+      </span>
     </button>
     <div class="backlog__content">
       <div class="backlog__scroll">
@@ -18,12 +20,12 @@
           <div class="backlog__user">
             <div class="backlog__account">
               <img
-                src="@/assets/img/user6.jpg"
-                alt="Ваш аватар"
-                width="32"
-                height="32"
+                  :src="userImage"
+                  alt="Ваш аватар"
+                  width="32"
+                  height="32"
               />
-              Игорь Пятин
+              {{ authStore.user.name }}
             </div>
 
             <div class="backlog__counter">
@@ -34,11 +36,11 @@
           <div class="backlog__target-area">
             <!--  Задачи в беклоге-->
             <task-card
-              v-for="task in tasksStore.sidebarTasks"
-              :key="task.id"
-              :task="task"
-              class="backlog__task"
-              @drop="moveTask($event, task)"
+                v-for="task in tasksStore.sidebarTasks"
+                :key="task.id"
+                :task="task"
+                class="backlog__task"
+                @drop="moveTask($event, task)"
             />
           </div>
         </div>
@@ -48,38 +50,41 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
-import AppDrop from "@/common/components/AppDrop.vue";
-import TaskCard from "@/modules/tasks/components/TaskCard.vue";
-import { getTargetColumnTasks, addActive } from "@/common/helpers";
-import { useTasksStore } from "@/stores/tasks";
+import { reactive } from 'vue'
+import AppDrop from '@/common/components/AppDrop.vue'
+import TaskCard from '@/modules/tasks/components/TaskCard.vue'
+import { getTargetColumnTasks, addActive, getPublicImage } from '@/common/helpers'
+import { useTasksStore, useAuthStore } from '@/stores'
 
-const tasksStore = useTasksStore();
+const tasksStore = useTasksStore()
+const authStore = useAuthStore()
 
-const state = reactive({ backlogIsHidden: false });
+const state = reactive({ backlogIsHidden: false })
 
-function moveTask(active, toTask) {
-  // Не обновляем массив, если задача не перемещалась
+const userImage = getPublicImage(authStore.user.avatar)
+
+function moveTask (active, toTask) {
+  // Не обновляем массив если задача фактически не перемещалась
   if (toTask && active.id === toTask.id) {
-    return;
+    return
   }
 
-  const toColumnId = null;
+  const toColumnId = null
   // Получить задачи для текущей колонки
-  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
-  const activeClone = { ...active, columnId: toColumnId };
+  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks)
+  const activeClone = { ...active, columnId: toColumnId }
   // Добавить активную задачу в колонку
-  const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
-  const tasksToUpdate = [];
+  const resultTasks = addActive(activeClone, toTask, targetColumnTasks)
+  const tasksToUpdate = []
 
   // Отсортировать задачи в колонке
   resultTasks.forEach((task, index) => {
     if (task.sortOrder !== index || task.id === active.id) {
-      const newTask = { ...task, sortOrder: index };
-      tasksToUpdate.push(newTask);
+      const newTask = { ...task, sortOrder: index }
+      tasksToUpdate.push(newTask)
     }
-  });
-  tasksStore.updateTasks(tasksToUpdate);
+  })
+  tasksStore.updateTasks(tasksToUpdate)
 }
 </script>
 

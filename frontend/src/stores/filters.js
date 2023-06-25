@@ -1,23 +1,23 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia'
 
-export const useFiltersStore = defineStore("filters", {
-  state: () => ({
-    search: "",
-    users: [],
-    statuses: [],
-  }),
-  getters: {
-    filters: (state) => {
-      const { search, users, statuses } = state;
-      return {
-        search,
-        users,
-        statuses,
-      };
-    },
-  },
-  actions: {
-    applyFilters ({ item, entity }) {
+export const useFiltersStore = defineStore('filters', {
+	state: () => ({
+		search: '',
+		users: [],
+		statuses: []
+	}),
+	getters: {
+		filters: state => {
+			const { search, users, statuses } = state
+			return {
+				search,
+				users,
+				statuses
+			}
+		}
+	},
+	actions: {
+		applyFilters ({ item, entity }) {
 			if (entity === 'search') {
 				this.search = item
 			} else {
@@ -30,5 +30,4 @@ export const useFiltersStore = defineStore("filters", {
 			}
 		}
 	},
-  },
-});
+})
