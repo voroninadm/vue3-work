@@ -1,44 +1,46 @@
 <template>
   <div class="task-card__tags">
     <div class="task-card__tags--text">
-      Добавьте тэги, разделенные символом #
+      Добавьте теги, разделённые символом #
     </div>
-    <task-card-creator-tags-analyzer
+    <transition name="replace">
+      <task-card-creator-tags-analyzer
         v-if="showAnalyzer"
         class="task-card__tags-analyzer"
         :tags="tags"
         @setTags="setTags"
-    />
+      />
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import TaskCardCreatorTagsAnalyzer from './TaskCardCreatorTagsAnalyzer.vue'
+import { ref } from "vue";
+import TaskCardCreatorTagsAnalyzer from "./TaskCardCreatorTagsAnalyzer.vue";
 
 const props = defineProps({
   tags: {
     type: String,
-    required: true
-  }
-})
-const emits = defineEmits(['setTags'])
+    required: true,
+  },
+});
+const emits = defineEmits(["setTags"]);
 
-const showAnalyzer = ref(true)
-const timeout = ref(null)
+const showAnalyzer = ref(true);
+const timeout = ref(null);
 
 function setTags(tags, refresh) {
   if (refresh) {
     // При обновлении тегов очищаем текущую строку
-    showAnalyzer.value = false
-    emits('setTags', tags)
+    showAnalyzer.value = false;
+    emits("setTags", tags);
     // Обновляем анализатор за минимальное время
     timeout.value = setTimeout(() => {
-      showAnalyzer.value = true
-      clearTimeout(timeout.value)
-    })
+      showAnalyzer.value = true;
+      clearTimeout(timeout.value);
+    }, 500);
   } else {
-    emits('setTags', tags)
+    emits("setTags", tags);
   }
 }
 </script>

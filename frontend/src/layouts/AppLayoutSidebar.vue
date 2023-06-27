@@ -1,30 +1,23 @@
 <template>
   <!--  Отслеживает в какую колонку передана задача-->
   <app-drop
-      class="backlog"
-      :class="{ 'backlog--hide': state.backlogIsHidden }"
-      @drop="moveTask"
+    class="backlog"
+    :class="{ 'backlog--hide': state.backlogIsHidden }"
+    @drop="moveTask"
   >
     <!--  Отвечает за открытие/закрытие беклога-->
     <button
-        class="backlog__title"
-        @click="state.backlogIsHidden = !state.backlogIsHidden"
+      class="backlog__title"
+      @click="state.backlogIsHidden = !state.backlogIsHidden"
     >
-      <span>
-        Бэклог
-      </span>
+      <span> Бэклог </span>
     </button>
     <div class="backlog__content">
       <div class="backlog__scroll">
         <div class="backlog__collapse">
           <div class="backlog__user">
             <div class="backlog__account">
-              <img
-                  :src="userImage"
-                  alt="Ваш аватар"
-                  width="32"
-                  height="32"
-              />
+              <img :src="userImage" alt="Ваш аватар" width="32" height="32" />
               {{ authStore.user.name }}
             </div>
 
@@ -35,13 +28,15 @@
 
           <div class="backlog__target-area">
             <!--  Задачи в беклоге-->
-            <task-card
-                v-for="task in tasksStore.sidebarTasks"
-                :key="task.id"
-                :task="task"
-                class="backlog__task"
-                @drop="moveTask($event, task)"
-            />
+            <transition-group name="tasks">
+              <div v-for="task in tasksStore.sidebarTasks" :key="task.id">
+                <task-card
+                  :task="task"
+                  class="backlog__task"
+                  @drop="moveTask($event, task)"
+                />
+              </div>
+            </transition-group>
           </div>
         </div>
       </div>
@@ -50,41 +45,45 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import AppDrop from '@/common/components/AppDrop.vue'
-import TaskCard from '@/modules/tasks/components/TaskCard.vue'
-import { getTargetColumnTasks, addActive, getPublicImage } from '@/common/helpers'
-import { useTasksStore, useAuthStore } from '@/stores'
+import { reactive } from "vue";
+import AppDrop from "@/common/components/AppDrop.vue";
+import TaskCard from "@/modules/tasks/components/TaskCard.vue";
+import {
+  getTargetColumnTasks,
+  addActive,
+  getPublicImage,
+} from "@/common/helpers";
+import { useTasksStore, useAuthStore } from "@/stores";
 
-const tasksStore = useTasksStore()
-const authStore = useAuthStore()
+const tasksStore = useTasksStore();
+const authStore = useAuthStore();
 
-const state = reactive({ backlogIsHidden: false })
+const state = reactive({ backlogIsHidden: false });
 
-const userImage = getPublicImage(authStore.user.avatar)
+const userImage = getPublicImage(authStore.user.avatar);
 
-function moveTask (active, toTask) {
+function moveTask(active, toTask) {
   // Не обновляем массив если задача фактически не перемещалась
   if (toTask && active.id === toTask.id) {
-    return
+    return;
   }
 
-  const toColumnId = null
+  const toColumnId = null;
   // Получить задачи для текущей колонки
-  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks)
-  const activeClone = { ...active, columnId: toColumnId }
+  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
+  const activeClone = { ...active, columnId: toColumnId };
   // Добавить активную задачу в колонку
-  const resultTasks = addActive(activeClone, toTask, targetColumnTasks)
-  const tasksToUpdate = []
+  const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
+  const tasksToUpdate = [];
 
   // Отсортировать задачи в колонке
   resultTasks.forEach((task, index) => {
     if (task.sortOrder !== index || task.id === active.id) {
-      const newTask = { ...task, sortOrder: index }
-      tasksToUpdate.push(newTask)
+      const newTask = { ...task, sortOrder: index };
+      tasksToUpdate.push(newTask);
     }
-  })
-  tasksStore.updateTasks(tasksToUpdate)
+  });
+  tasksStore.updateTasks(tasksToUpdate);
 }
 </script>
 
@@ -260,5 +259,17 @@ function moveTask (active, toTask) {
     margin-bottom: 11px;
     margin-left: 12px;
   }
+}
+
+.tasks-enter-active,
+.tasks-leave-active {
+  transition: all $animationSpeed ease;
+}
+
+.tasks-enter,
+.tasks-leave-to {
+  transform: scale(1.1);
+
+  opacity: 0;
 }
 </style>

@@ -1,124 +1,126 @@
 <template>
-<!--  Отслеживает в какую колонку передана задача-->
-  <app-drop
-      class="column"
-      @drop="moveTask"
-  >
+  <!--  Отслеживает в какую колонку передана задача-->
+  <app-drop class="column" @drop="moveTask">
     <h2 class="column__name">
-<!--      Показывает наименование колонки-->
+      <!--      Показывает наименование колонки-->
       <span v-if="!state.isInputShowed">
         {{ state.columnTitle }}
       </span>
 
-<!--      Показывает инпут если колонка редактируется-->
+      <!--      Показывает инпут если колонка редактируется-->
       <input
-          v-else
-          ref="columnTitle"
-          v-model="state.columnTitle"
-          type="text"
-          class="column__input"
-          name="column_title"
-          @blur="updateInput"
+        v-else
+        ref="columnTitle"
+        v-model="state.columnTitle"
+        type="text"
+        class="column__input"
+        name="column_title"
+        @blur="updateInput"
       />
 
-<!--      Показывает иконку редактирования задачи-->
+      <!--      Показывает иконку редактирования задачи-->
       <app-icon
-          v-if="!state.isInputShowed"
-          class="icon--edit"
-          @click="showInput"
+        v-if="!state.isInputShowed"
+        class="icon--edit"
+        @click="showInput"
       />
-<!--      Показывает иконку удаления колонки-->
-<!--      Иконка не будет отображаться если в колонке есть задачи-->
+      <!--      Показывает иконку удаления колонки-->
+      <!--      Иконка не будет отображаться если в колонке есть задачи-->
       <app-icon
-          v-if="!state.isInputShowed && !columnTasks.length"
-          class="icon--trash"
-          @click="$emit('delete', column.id)"
+        v-if="!state.isInputShowed && !columnTasks.length"
+        class="icon--trash"
+        @click="$emit('delete', column.id)"
       />
     </h2>
 
     <div class="column__target-area">
-<!--      Вынесли задачи в отдельный компонент-->
-      <task-card
-          v-for="task in columnTasks"
-          :key="task.id"
-          :task="task"
-          class="column__task"
-          @drop="moveTask($event, task)"
-      />
+      <!--      Вынесли задачи в отдельный компонент-->
+      <transition-group name="tasks">
+        <div v-for="task in columnTasks" :key="task.id">
+          <task-card
+            :task="task"
+            class="column__task"
+            @drop="moveTask($event, task)"
+          />
+        </div>
+      </transition-group>
     </div>
   </app-drop>
 </template>
 
 <script setup>
-import { reactive, computed, nextTick, ref } from 'vue'
-import AppDrop from '@/common/components/AppDrop.vue'
-import AppIcon from '@/common/components/AppIcon.vue'
-import TaskCard from '@/modules/tasks/components/TaskCard.vue'
-import { getTargetColumnTasks, addActive } from '@/common/helpers'
-import { useTasksStore } from '@/stores'
+import { reactive, computed, nextTick, ref } from "vue";
+import AppDrop from "@/common/components/AppDrop.vue";
+import AppIcon from "@/common/components/AppIcon.vue";
+import TaskCard from "@/modules/tasks/components/TaskCard.vue";
+import { getTargetColumnTasks, addActive } from "@/common/helpers";
+import { useTasksStore } from "@/stores";
 
-const tasksStore = useTasksStore()
+const tasksStore = useTasksStore();
 
 const props = defineProps({
   column: {
     type: Object,
-    required: true
-  }
-})
-const columnTitle = ref(null)
-const state = reactive({ isInputShowed: false, columnTitle: props.column.title })
-const emits = defineEmits(['update', 'delete'])
+    required: true,
+  },
+});
+const columnTitle = ref(null);
+const state = reactive({
+  isInputShowed: false,
+  columnTitle: props.column.title,
+});
+const emits = defineEmits(["update", "delete"]);
 
 // Фильтруем задачи, которые относятся к конкретной колонке
 const columnTasks = computed(() => {
   return tasksStore.filteredTasks
-    .filter(task => task.columnId === props.column.id)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-})
+    .filter((task) => task.columnId === props.column.id)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+});
 
 // Показывает инпут для редактирования колонки и наводим фокус
-async function showInput () {
-  state.isInputShowed = true
+async function showInput() {
+  state.isInputShowed = true;
   // Функция nextTick ожидает когда произойдет ререндер компонента
   // Так как мы изменили span ни input, нам нужно подождать когда отрисуется инпут
-  await nextTick()
-  columnTitle.value.focus()
+  await nextTick();
+  columnTitle.value.focus();
 }
 
-function updateInput () {
-  state.isInputShowed = false
+function updateInput() {
+  state.isInputShowed = false;
   if (props.column.title === state.columnTitle) {
-    return
+    return;
   }
-  emits('update', {
+  emits("update", {
     ...props.column,
-    title: state.columnTitle
-  })
+    title: state.columnTitle,
+  });
 }
 
 // Метод для переноса задач
-function moveTask (active, toTask) {
+function moveTask(active, toTask) {
   // Не обновлять если нет изменений
   if (toTask && active.id === toTask.id) {
-    return
+    return;
   }
 
-  const toColumnId = props.column ? props.column.id : null
+  const toColumnId = props.column ? props.column.id : null;
   // Получить задачи для текущей колонки
-  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks)
-  const activeClone = { ...active, columnId: toColumnId }
+  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
+  const activeClone = { ...active, columnId: toColumnId };
   // Добавить активную задачу в колонку
-  const resultTasks = addActive(activeClone, toTask, targetColumnTasks)
-  const tasksToUpdate = []
+  const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
+  const tasksToUpdate = [];
 
   // Отсортировать задачи в колонке
   resultTasks.forEach((task, index) => {
     if (task.sortOrder !== index || task.id === active.id) {
-      const newTask = { ...task, sortOrder: index }
-      tasksToUpdate.push(newTask)
+      const newTask = { ...task, sortOrder: index };
+      tasksToUpdate.push(newTask);
     }
-  })
-  tasksStore.updateTasks(tasksToUpdate)
+  });
+  tasksStore.updateTasks(tasksToUpdate);
 }
 </script>
 
@@ -200,5 +202,17 @@ function moveTask (active, toTask) {
     margin-right: 5px;
     margin-left: 5px;
   }
+}
+
+.tasks-enter-active,
+.tasks-leave-active {
+  transition: all $animationSpeed ease;
+}
+
+.tasks-enter,
+.tasks-leave-to {
+  transform: scale(1.1);
+
+  opacity: 0;
 }
 </style>
